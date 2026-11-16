@@ -72,6 +72,22 @@ NEXT_PUBLIC_API_URL=http://meu-host:8080/api/v2 CORS_ORIGINS=http://meu-host:300
   (o `db` tem 2 min para o checkpoint); uma queda abrupta esvazia o cache e a próxima visita recarrega 2026.
 - O job diário do pipeline (`data/compose.yaml`) é independente desta stack e atualiza o data lake, não o banco local.
 
+## Demo pública
+
+**https://fire-atlas.duckdns.org**
+
+A mesma stack do compose roda numa instância EC2 (`m6a.xlarge`, Ubuntu 24.04, `us-east-2`) criada pela stack
+CloudFormation `fire-atlas-app`, que clona este repositório e sobe `docker compose`. Um Caddy na frente emite o
+certificado HTTPS (Let's Encrypt) e roteia `/api/*` para a API e o resto para a interface, então front e API
+ficam na mesma origem.
+
+| Item | Valor |
+|---|---|
+| DNS | `fire-atlas.duckdns.org` → Elastic IP `18.189.223.70` (não muda ao parar/religar a instância) |
+| Portas públicas | 80 (redireciona para 443), 443, 3000 e 8080; PostGIS não é exposto |
+| Acesso à máquina | Sem SSH; Session Manager (`aws ssm start-session --target <instance-id>`) |
+| Credenciais AWS | Role da instância (leitura do lake + Athena workgroup `fireatlas-api`); sem chaves no `.env` |
+
 ## Desenvolvimento sem Docker
 
 Cada parte roda isolada; os comandos estão no README de cada pasta:
