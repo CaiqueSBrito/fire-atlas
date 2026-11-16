@@ -1,0 +1,219 @@
+@import "tailwindcss";
+
+/*
+ * Design tokens — tema espacial (dark first).
+ * Contraste alvo: WCAG AA (4.5:1 texto, 3:1 UI). Nunca usar só cor para
+ * transmitir informação: sempre acompanhar de rótulo/legenda/ícone.
+ */
+:root {
+  --space-950: #04060c; /* fundo base */
+  --space-900: #0a0f1e; /* superfícies */
+  --space-800: #121a31; /* cards / painéis */
+  --space-600: #2a3558; /* bordas */
+  --ink-100: #f2f5ff; /* texto principal */
+  --ink-300: #aab4d4; /* texto secundário */
+  --fire-500: #e5242b; /* botão vermelho de acesso */
+  --fire-400: #ff4a3d; /* hover / glow */
+  --ember-400: #ffb02e; /* destaque / foco ativo */
+  --earth-400: #3aa6ff; /* oceano / atmosfera do globo */
+  --focus-ring: #ffd166;
+}
+
+@theme inline {
+  --color-space-950: var(--space-950);
+  --color-space-900: var(--space-900);
+  --color-space-800: var(--space-800);
+  --color-space-600: var(--space-600);
+  --color-ink-100: var(--ink-100);
+  --color-ink-300: var(--ink-300);
+  --color-fire-500: var(--fire-500);
+  --color-fire-400: var(--fire-400);
+  --color-ember-400: var(--ember-400);
+  --color-earth-400: var(--earth-400);
+  /* Identidade dos sensores (sempre com forma + texto; ver lib/sensors.ts) */
+  --color-modis: #ffb02e;
+  --color-viirs: #ff4a3d;
+  --color-harmonized: #3aa6ff;
+
+  --font-display: var(--font-space-grotesk), system-ui, sans-serif;
+  --font-sans: var(--font-fustat), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+
+  /* Escala tipográfica fluida (mobile → desktop) */
+  --text-display: clamp(2.5rem, 1.5rem + 5vw, 5.5rem);
+  --text-h1: clamp(2rem, 1.4rem + 2.5vw, 3.5rem);
+  --text-h2: clamp(1.5rem, 1.2rem + 1.2vw, 2.25rem);
+  --text-body: 1rem;
+  --text-small: 0.875rem;
+  --text-caption: 0.75rem;
+}
+
+body {
+  background: var(--space-950);
+  color: var(--ink-100);
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  line-height: 1.6;
+}
+
+/* Tailwind v4 deixa botões com cursor padrão: aqui o que é clicável mostra a mãozinha */
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]),
+[role="option"],
+[role="combobox"],
+summary,
+label[for],
+input[type="checkbox"],
+input[type="radio"] {
+  cursor: pointer;
+}
+button:disabled,
+[aria-disabled="true"] {
+  cursor: not-allowed;
+}
+
+/* Foco visível para navegação por teclado (RN04) */
+:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.pop-in {
+  animation: pop-in 0.18s ease-out both;
+  transform-origin: top left;
+}
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.97);
+  }
+}
+
+html {
+  scrollbar-color: var(--space-600) transparent;
+  scrollbar-width: thin;
+}
+
+* {
+  scrollbar-color: var(--space-600) transparent;
+  scrollbar-width: thin;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--space-600);
+  border: 2px solid var(--space-900);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ember-400);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Escala de tipografia e medidas do design system de referência (só tamanhos; as cores são as do Fire Atlas). */
+@utility type-overline {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 500;
+  letter-spacing: 0.88px;
+  text-transform: uppercase;
+}
+@utility type-statement {
+  font-size: 30px;
+  line-height: 36px;
+  font-weight: 600;
+  letter-spacing: -0.6px;
+  @media (width >= 64rem) {
+    font-size: 48px;
+    line-height: 58px;
+    letter-spacing: -1.4px;
+  }
+}
+@utility type-kpi {
+  font-size: 32px;
+  line-height: 40px;
+  font-weight: 600;
+  letter-spacing: -0.64px;
+}
+@utility type-heading-page {
+  font-size: 28px;
+  line-height: 36px;
+  font-weight: 600;
+  letter-spacing: -0.42px;
+}
+@utility type-heading-section {
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+}
+@utility type-heading-card {
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 600;
+  letter-spacing: -0.08px;
+}
+@utility type-body {
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+}
+@utility type-body-small {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
+}
+@utility type-label-small {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+}
+@utility type-button-small {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+}
+@utility type-caption {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 400;
+  letter-spacing: 0.12px;
+}
+@utility type-mono-data {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+}
+@utility rounded-panel {
+  border-radius: 20px;
+}
+@utility px-page {
+  padding-inline: 20px;
+  @media (width >= 64rem) {
+    padding-inline: 72px;
+  }
+}

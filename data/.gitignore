@@ -1,0 +1,17 @@
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+/data/
+/output/
+*.duckdb
+*.duckdb.wal
+.env
+.env.*
+!.env.example
+/.tmp/
+/demo/
+/j1.csv
+/.omp/evidence/RF07-harmonization/model-v0.3/
+
+/.omp/

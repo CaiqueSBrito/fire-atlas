@@ -1,0 +1,67 @@
+# Stack completa: PostGIS + API Spring Boot (backend/) + UI Next.js (frontend/).
+#   docker compose up -d --build
+#   UI em http://localhost:3000, API em http://localhost:8080, PostGIS em localhost:5433.
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    platform: linux/amd64   # a imagem oficial so tem amd64; em ARM (Apple Silicon) roda emulada
+    # Carga anual (COPY de dezenas de milhoes de linhas): cache maior e WAL folgado evitam checkpoints forcados.
+    command:
+      - postgres
+      - -c
+      - shared_buffers=1GB
+      - -c
+      - max_wal_size=8GB
+      - -c
+      - checkpoint_timeout=15min
+      - -c
+      - wal_compression=on
+      - -c
+      - maintenance_work_mem=256MB
+    shm_size: 1g
+    # Cache anual sem WAL (V20) so sobrevive a desligamento limpo: o padrao de 10 s pode virar SIGKILL no checkpoint.
+    stop_grace_period: 2m
+    environment:
+      POSTGRES_DB: fireatlas
+      POSTGRES_USER: fireatlas
+      POSTGRES_PASSWORD: fireatlas
+    ports:
+      - "5433:5432"   # 5433 no host para nao conflitar com outro Postgres local
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fireatlas -d fireatlas"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  api:
+    build: ./backend
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - path: ./backend/.env  # DATALAKE_BUCKET, AWS_* etc.; opcional
+        required: false
+    environment:              # sobrepoe o .env: dentro da rede do compose o banco e db:5432
+      DB_URL: jdbc:postgresql://db:5432/fireatlas
+      DB_USER: fireatlas
+      DB_PASSWORD: fireatlas
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+    ports:
+      - "8080:8080"
+
+  web:
+    build:
+      context: ./frontend
+      # NEXT_PUBLIC_* entram no bundle no build e sao lidos pelo navegador: a URL precisa ser alcancavel pelo host.
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL-http://localhost:8080/api/v2}
+        NEXT_PUBLIC_FEATURE_FORECAST: ${NEXT_PUBLIC_FEATURE_FORECAST:-false}
+    depends_on:
+      - api
+    ports:
+      - "3000:3000"
+
+volumes:
+  pgdata:
